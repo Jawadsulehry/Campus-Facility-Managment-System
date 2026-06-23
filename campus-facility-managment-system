@@ -1,0 +1,659 @@
+#include<iostream>
+#include<vector>
+#include<fstream>
+#include<sstream>
+using namespace std;
+
+// ============================================================================
+// CLASS DECLARATIONS
+// ============================================================================
+
+class user {
+protected:
+    int id;
+    string name;
+    string password;
+    string role;
+    double balance;
+public:
+    user();
+    user(int i, string n, string p, string r, double b);
+    virtual void showMenu() = 0;
+
+    int getId() const;
+    string getName() const;
+    string getPassword() const;
+    string getRole() const;
+    double getBalance() const;
+
+    void setBalance(double b);
+    void addBalance(double a);
+    void deductBalance(double d);
+    void display();
+};
+
+class student : public user {
+public:
+    student();
+    student(int i, string n, string p, double b = 100.0);
+    void showMenu();
+    void add();
+};
+
+class faculty : public user {
+public:
+    faculty(int i, string n, string p, double b = 0.0);
+    void showMenu();
+    void add();
+};
+
+class admin : public user {
+public:
+    admin();
+    admin(int i, string n, string p);
+    void showMenu();
+    void add();
+};
+
+class Facility {
+    int id;
+    string name;
+    double rate;
+    int capacity;
+    bool available;
+public:
+    Facility();
+    Facility(int i, string n, double r, int c);
+    int getid() const;
+    string getname() const;
+    double getrate() const;
+    int getcapacity() const;
+    bool isavailable() const;
+    void setAvailable(bool a);
+
+    void display();
+    void add();
+};
+
+class Booking {
+    int bookingid;
+    int userid;
+    int facilityid;
+    string username;
+    string facilityname;
+    int starthour;
+    int duration;
+    double cost;
+    string status;
+public:
+    Booking();
+    Booking(int i, int ii, int iii, string un, string fn, int s, int d, double c);
+    int getBookingid() const;
+    int getUserid() const;
+    int getFacilityid() const;
+    string getUsername() const;
+    int getStarthour() const;
+    int getduration() const;
+    int getendhour() const;
+    double getcost() const;
+    string getstatus() const;
+    void display();
+    void setStatus(const string& s) { status = s; }
+};
+
+// ============================================================================
+// FUNCTION DECLARATIONS
+// ============================================================================
+
+void Admin(vector<Facility*>& facility, vector<Booking*>& booking, admin*& admin, vector<student*>& users);
+void login(admin* admin, vector<Facility*>& facility, vector<student*>& studentusers, vector<Booking*>& booking);
+void saveData(const vector<Facility*>& facilities, const vector<Booking*>& bookings, const vector<student*>& users);
+void loadData(vector<Facility*>& facilities, vector<Booking*>& bookings, vector<student*>& users);
+
+template<class T>
+void Register(vector<T*>& users) {
+    T* user = new T;
+    user->add();
+    users.push_back(user);
+    cout << "Successfully added" << endl;
+}
+
+template<class T>
+void view(vector <T*>& user) {
+    for (size_t i = 0; i < user.size(); i++) {
+        user[i]->display();
+    }
+}
+
+// ============================================================================
+// IMPLEMENTATION - USER CLASS
+// ============================================================================
+
+user::user() {
+    id = 0;
+    balance = 0.0;
+    role = "";
+    name = "";
+    password = "";
+}
+
+user::user(int i, string n, string p, string r, double b) {
+    id = i;
+    name = n;
+    password = p;
+    role = r;
+    balance = b;
+}
+
+int user::getId() const {
+    return id;
+}
+
+string user::getName() const {
+    return name;
+}
+
+string user::getPassword() const {
+    return password;
+}
+
+string user::getRole() const {
+    return role;
+}
+
+double user::getBalance() const {
+    return balance;
+}
+
+void user::setBalance(double b) {
+    balance = b;
+}
+
+void user::addBalance(double a) {
+    balance += a;
+}
+
+void user::deductBalance(double d) {
+    balance -= d;
+}
+
+void user::display() {
+    cout << "ID: " << id << endl;
+    cout << "Name: " << name << endl;
+    cout << "Role: " << role << endl;
+    cout << "Balance: " << balance << endl;
+}
+
+// ============================================================================
+// IMPLEMENTATION - STUDENT CLASS
+// ============================================================================
+
+student::student()
+    : user(0, "", "", "Student", 100.0) {
+}
+
+student::student(int i, string n, string p, double b)
+    : user(i, n, p, "Student", b) {
+}
+
+void student::showMenu() {
+    cout << "Student menu:" << endl;
+    cout << "1. view facilities" << endl;
+    cout << "2. book facility" << endl;
+    cout << "3. view bookings" << endl;
+    cout << "4. cancel booking" << endl;
+    cout << "5. check balance" << endl;
+    cout << "6. add money" << endl;
+    cout << "7. logout" << endl;
+    cout << "Enter choice: " << endl;
+}
+
+void student::add() {
+    cout << "Enter ID: ";
+    cin >> id;
+    cout << "Enter Name: ";
+    cin >> name;
+    cout << "Enter Password: ";
+    cin >> password;
+}
+
+// ============================================================================
+// IMPLEMENTATION - FACULTY CLASS
+// ============================================================================
+
+faculty::faculty(int i, string n, string p, double b)
+    : user(i, n, p, "Faculty", b) {
+}
+
+void faculty::showMenu() {
+    cout << "Faculty menu:" << endl;
+    cout << "1. view facilities" << endl;
+    cout << "2. book facility" << endl;
+    cout << "3. view bookings" << endl;
+    cout << "4. cancel booking" << endl;
+    cout << "5. check balance" << endl;
+    cout << "6. add money" << endl;
+    cout << "7. logout" << endl;
+    cout << "Enter choice: " << endl;
+}
+
+void faculty::add() {
+    cout << "Enter ID: ";
+    cin >> id;
+    cout << "Enter Name: ";
+    cin >> name;
+    cout << "Enter Password: ";
+    cin >> password;
+}
+
+// ============================================================================
+// IMPLEMENTATION - ADMIN CLASS
+// ============================================================================
+
+admin::admin() {
+    id = 1;
+    name = "admin";
+    password = "admin";
+    role = "Admin";
+}
+
+admin::admin(int i, string n, string p)
+    : user(i, n, p, "Admin", 0) {
+}
+
+void admin::showMenu() {
+    cout << " ADMIN MENU " << endl;
+    cout << "1. add facility" << endl;
+    cout << "2. view all facilities" << endl;
+    cout << "3. view all bookings" << endl;
+    cout << "4. approve booking" << endl;
+    cout << "5. reject booking" << endl;
+    cout << "6. view revenue" << endl;
+    cout << "7. save data" << endl;
+    cout << "8. logout" << endl;
+    cout << "Enter choice: ";
+}
+
+void admin::add() {
+    cout << "Enter ID: ";
+    cin >> id;
+    cout << "Enter Name: ";
+    cin >> name;
+    cout << "Enter Password: ";
+    cin >> password;
+}
+
+// ============================================================================
+// IMPLEMENTATION - FACILITY CLASS
+// ============================================================================
+
+Facility::Facility() {
+    id = 0;
+    rate = 0.0;
+    capacity = 0;
+    available = true;
+}
+
+Facility::Facility(int i, string n, double r, int c) {
+    id = i;
+    name = n;
+    rate = r;
+    capacity = c;
+    available = true;
+}
+
+int Facility::getid() const {
+    return id;
+}
+
+string Facility::getname() const {
+    return name;
+}
+
+double Facility::getrate() const {
+    return rate;
+}
+
+int Facility::getcapacity() const {
+    return capacity;
+}
+
+bool Facility::isavailable() const {
+    return available;
+}
+
+void Facility::setAvailable(bool a) {
+    available = a;
+}
+
+void Facility::add() {
+    cout << "Enter Facility ID: ";
+    cin >> id;
+    cout << "Enter Facility Name: ";
+    cin >> name;
+    cout << "Enter Facility Rate: ";
+    cin >> rate;
+    cout << "Enter Facility Capacity: ";
+    cin >> capacity;
+}
+
+void Facility::display() {
+    cout << "Facility ID: " << id << endl;
+    cout << "Facility Name: " << name << endl;
+    cout << "Facility Rate: " << rate << endl;
+    cout << "Facility Capacity: " << capacity << endl;
+    cout << (available ? "Available" : "Not Available") << endl;
+}
+
+// ============================================================================
+// IMPLEMENTATION - BOOKING CLASS
+// ============================================================================
+
+Booking::Booking() {
+    bookingid = 0;
+    userid = 0;
+    facilityid = 0;
+    starthour = 0;
+    duration = 0;
+    cost = 0.0;
+    status = "Pending";
+}
+
+Booking::Booking(int i, int ii, int iii, string un, string fn,
+    int s, int d, double c) {
+    bookingid = i;
+    userid = ii;
+    facilityid = iii;
+    username = un;
+    facilityname = fn;
+    starthour = s;
+    duration = d;
+    cost = c;
+    status = "Pending";
+}
+
+int Booking::getBookingid() const {
+    return bookingid;
+}
+
+int Booking::getUserid() const {
+    return userid;
+}
+
+int Booking::getFacilityid() const {
+    return facilityid;
+}
+
+string Booking::getUsername() const {
+    return username;
+}
+
+int Booking::getStarthour() const {
+    return starthour;
+}
+
+int Booking::getduration() const {
+    return duration;
+}
+
+int Booking::getendhour() const {
+    return starthour + duration;
+}
+
+double Booking::getcost() const {
+    return cost;
+}
+
+string Booking::getstatus() const {
+    return status;
+}
+
+void Booking::display() {
+    cout << "Booking ID: " << bookingid << endl;
+    cout << "User: " << username << endl;
+    cout << "Facility: " << facilityname << endl;
+    cout << "Time: " << starthour << " - " << getendhour() << endl;
+    cout << "Cost: " << cost << endl;
+    cout << "Status: " << status << endl;
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+static inline vector<string> splitLine(const string& line, char delim = '|') {
+    vector<string> parts;
+    string token;
+    stringstream ss(line);
+    while (getline(ss, token, delim)) {
+        parts.push_back(token);
+    }
+    return parts;
+}
+
+// ============================================================================
+// PERSISTENCE - SAVE/LOAD
+// ============================================================================
+
+void saveData(const vector<Facility*>& facilities, const vector<Booking*>& bookings, const vector<student*>& users) {
+    // Save users
+    ofstream uf("users.txt");
+    if (uf.is_open()) {
+        for (const student* u : users) {
+            uf << u->getId() << '|' << u->getName() << '|' << u->getPassword() << '|' << u->getRole() << '|' << u->getBalance() << '\n';
+        }
+        uf.close();
+    }
+    else {
+        cerr << "Failed to open users.txt for writing\n";
+    }
+
+    // Save facilities
+    ofstream ff("facilities.txt");
+    if (ff.is_open()) {
+        for (const Facility* f : facilities) {
+            ff << f->getid() << '|' << f->getname() << '|' << f->getrate() << '|' << f->getcapacity() << '|' << (f->isavailable() ? 1 : 0) << '\n';
+        }
+        ff.close();
+    }
+    else {
+        cerr << "Failed to open facilities.txt for writing\n";
+    }
+
+    // Save bookings
+    ofstream bf("bookings.txt");
+    if (bf.is_open()) {
+        for (const Booking* b : bookings) {
+            bf << b->getBookingid() << '|' << b->getUserid() << '|' << b->getFacilityid() << '|' << b->getUsername() << '|' << " " << '|' << b->getStarthour() << '|' << b->getduration() << '|' << b->getcost() << '|' << b->getstatus() << '\n';
+        }
+        bf.close();
+    }
+    else {
+        cerr << "Failed to open bookings.txt for writing\n";
+    }
+}
+
+void loadData(vector<Facility*>& facilities, vector<Booking*>& bookings, vector<student*>& users) {
+    // Clear existing data
+    for (Facility* f : facilities) delete f;
+    facilities.clear();
+    for (Booking* b : bookings) delete b;
+    bookings.clear();
+    for (student* u : users) delete u;
+    users.clear();
+
+    // Load users
+    ifstream uf("users.txt");
+    if (uf.is_open()) {
+        string line;
+        while (getline(uf, line)) {
+            if (line.empty()) continue;
+            vector<string> parts = splitLine(line);
+            if (parts.size() >= 5) {
+                int id = stoi(parts[0]);
+                string name = parts[1];
+                string pass = parts[2];
+                string role = parts[3];
+                double bal = stod(parts[4]);
+                if (role == "Student") {
+                    student* s = new student(id, name, pass, bal);
+                    users.push_back(s);
+                }
+            }
+        }
+        uf.close();
+    }
+
+    // Load facilities
+    ifstream ff("facilities.txt");
+    if (ff.is_open()) {
+        string line;
+        while (getline(ff, line)) {
+            if (line.empty()) continue;
+            vector<string> parts = splitLine(line);
+            if (parts.size() >= 5) {
+                int id = stoi(parts[0]);
+                string name = parts[1];
+                double rate = stod(parts[2]);
+                int cap = stoi(parts[3]);
+                int avail = stoi(parts[4]);
+                Facility* f = new Facility(id, name, rate, cap);
+                f->setAvailable(avail == 1);
+                facilities.push_back(f);
+            }
+        }
+        ff.close();
+    }
+
+    // Load bookings
+    ifstream bf("bookings.txt");
+    if (bf.is_open()) {
+        string line;
+        while (getline(bf, line)) {
+            if (line.empty()) continue;
+            vector<string> parts = splitLine(line);
+            if (parts.size() >= 9) {
+                int bid = stoi(parts[0]);
+                int uid = stoi(parts[1]);
+                int fid = stoi(parts[2]);
+                string uname = parts[3];
+                string fname = parts[4];
+                int start = stoi(parts[5]);
+                int dur = stoi(parts[6]);
+                double cost = stod(parts[7]);
+                string status = parts[8];
+                Booking* b = new Booking(bid, uid, fid, uname, fname, start, dur, cost);
+                b->setStatus(status);
+                bookings.push_back(b);
+            }
+        }
+        bf.close();
+    }
+}
+
+// ============================================================================
+// MAIN APPLICATION FUNCTIONS
+// ============================================================================
+
+void Admin(vector<Facility*>& facility, vector<Booking*>& booking, admin*& admin, vector<student*>& users) {
+    cout << "Login successful as Admin." << endl;
+    while (true) {
+        admin->showMenu();
+        int choice;
+        cout << "enter the choice: ";
+        cin >> choice;
+        if (choice == 1) {
+            Register(facility);
+        }
+        else if (choice == 2) {
+            cout << "All Facilities:" << endl;
+            view(facility);
+        }
+        else if (choice == 3) {
+            cout << "all Bookings " << endl;
+            view(booking);
+        }
+        else if (choice == 4) {
+            cout << "Approving booking... coming soon" << endl;
+        }
+        else if (choice == 5) {
+            cout << "Rejecting booking... coming soon" << endl;
+        }
+        else if (choice == 7) {
+            cout << "Saving data..." << endl;
+            saveData(facility, booking, users);
+            cout << "Data saved." << endl;
+        }
+        else if (choice == 8) {
+            cout << "Logging out..." << endl;
+            break;
+        }
+        else {
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+}
+
+void login(admin* admin, vector<Facility*>& facility, vector<student*>& studentusers, vector<Booking*>& booking) {
+    string name;
+    string password;
+    int id;
+    cout << "enter the id: ";
+    cin >> id;
+    cout << "Enter Name: ";
+    cin >> name;
+    cout << "Enter Password: ";
+    cin >> password;
+    if (name == admin->getName() && password == admin->getPassword()) {
+        Admin(facility, booking, admin, studentusers);
+    }
+    else {
+        cout << "invalid credentials!" << endl;
+    }
+}
+
+void mainmenu() {
+    admin adminuser;
+    vector<Facility*> facility;
+    vector<Booking*> booking;
+    vector<student*> users;
+    int choice;
+    cout << "CAMPUS FACILITY BOOKING SYSTEM" << endl;
+
+    // Load saved data at startup
+    loadData(facility, booking, users);
+
+    while (true) {
+        cout << "1. Login" << endl;
+        cout << "2. Register" << endl;
+        cout << "3. Exit" << endl;
+        cout << "Enter choice: " << endl;
+        cin >> choice;
+        if (choice == 1) {
+            login(&adminuser, facility, users, booking);
+        }
+        else if (choice == 2) {
+            Register(users);
+        }
+        else if (choice == 3) {
+            cout << "Saving data before exit..." << endl;
+            saveData(facility, booking, users);
+            cout << "Exiting the system. Goodbye!" << endl;
+            break;
+        }
+    }
+
+    // Cleanup allocated memory
+    for (auto f : facility) delete f;
+    for (auto b : booking) delete b;
+    for (auto u : users) delete u;
+}
+
+// ============================================================================
+// MAIN ENTRY POINT
+// ============================================================================
+
+int main() {
+    mainmenu();
+    return 0;
+}
